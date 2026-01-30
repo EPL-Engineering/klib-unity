@@ -235,6 +235,50 @@ namespace KLib.Network
             return result;
         }
 
+        public void StartBufferedSend()
+        {
+            _theStream = _socket.GetStream();
+            _theWriter = new BinaryWriter(_theStream);
+            _theReader = new BinaryReader(_theStream);
+        }
+
+        public void EndBufferedSend()
+        {
+            _theWriter.Close();
+            _theReader.Close();
+            _theStream.Close();
+        }
+
+        public int SendBuffer(string message)
+        {
+            byte[] bytes = Encoding.UTF8.GetBytes(message);
+            _theWriter.Write(ProcessInt32(bytes.Length));
+            _theWriter.Write(bytes);
+            _theWriter.Flush();
+            return _theReader.ReadInt32();
+        }
+
+        public int SendBuffer(byte[] buffer)
+        {
+            _theWriter.Write(ProcessInt32(buffer.Length));
+            _theWriter.Write(buffer);
+            _theWriter.Flush();
+            return _theReader.ReadInt32();
+        }
+
+        private int ProcessInt32(int raw)
+        {
+            int num = raw;
+            if (_bigEndian)
+            {
+                byte[] bytes = BitConverter.GetBytes(num);
+                Array.Reverse(bytes);
+                num = BitConverter.ToInt32(bytes, 0);
+            }
+
+            return num;
+        }
+
 
     }
 }
