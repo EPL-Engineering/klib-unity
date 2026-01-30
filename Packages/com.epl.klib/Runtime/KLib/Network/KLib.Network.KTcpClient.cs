@@ -235,20 +235,6 @@ namespace KLib.Network
             return result;
         }
 
-        public void StartBufferedSend()
-        {
-            _theStream = _socket.GetStream();
-            _theWriter = new BinaryWriter(_theStream);
-            _theReader = new BinaryReader(_theStream);
-        }
-
-        public void EndBufferedSend()
-        {
-            _theWriter.Close();
-            _theReader.Close();
-            _theStream.Close();
-        }
-
         public int SendBuffer(string message)
         {
             byte[] bytes = Encoding.UTF8.GetBytes(message);
