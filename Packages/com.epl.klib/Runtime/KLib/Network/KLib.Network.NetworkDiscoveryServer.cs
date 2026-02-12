@@ -19,10 +19,9 @@ namespace KLib.Network
         string _name = "";
         string _address = "";
         int _port = -1;
+        bool _multicast = true;
 
-        void Start()
-        {
-        }
+        void Start() { }
 
         /// <summary>
         /// Indicates whether UDP server is still running.
@@ -35,11 +34,12 @@ namespace KLib.Network
         /// <param name="name">Name of TCP server (typically all caps). Client broadcasts this name when searching for server. </param>
         /// <param name="address">LAN address on which TCP server is listening</param>
         /// <param name="port">Port on which TCP server is listening</param>
-        public void StartReceiving(string name, string address, int port)
+        public void StartReceiving(string name, string address, int port, bool multicast = true)
         {
             _name = name;
             _address = address;
             _port = port;
+            _multicast = multicast;
 
             // create thread for reading UDP messages
             _readThread = new Thread(new ThreadStart(ReceiveData));
@@ -85,9 +85,34 @@ namespace KLib.Network
             //StopThread();
         }
 
+        private string GetDiscoveryAddress(bool multicast,  string localAddress)
+        {
+            string discoveryAddress = "234.5.6.7";
+            if (!multicast)
+            {
+                if (localAddress.StartsWith("169.254"))
+                {
+                    discoveryAddress = "169.254.255.255";
+                }
+                else if (localAddress.StartsWith("192.168"))
+                {
+                    discoveryAddress = "192.168.1.255";
+                }
+                else if (localAddress.StartsWith("11.12"))
+                {
+                    discoveryAddress = "11.12.13.255";
+                }
+                else if (localAddress.Equals("127.0.0.1") || localAddress.Equals("localhost"))
+                {
+                    discoveryAddress = "127.0.0.1";
+                }
+            }
+            return discoveryAddress;
+        }
+
         private void ReceiveData()
         {
-            Debug.Log("Multicast discovery server listening on: " + _address);
+            Debug.Log("Discovery server listening on: " + _address);
 
             IPAddress localAddress;
             if (_address.Equals("localhost"))
@@ -101,7 +126,7 @@ namespace KLib.Network
 
             var ipLocal = new IPEndPoint(localAddress, 10000);
 
-            var address = IPAddress.Parse("234.5.6.7");
+            var address = IPAddress.Parse(GetDiscoveryAddress(_multicast, _address));
             var ipEndPoint = new IPEndPoint(address, 10000);
 
             _udp = new UdpClient();
@@ -109,10 +134,12 @@ namespace KLib.Network
             _udp.Client.Bind(ipLocal);
             _udp.Client.ReceiveTimeout = 500;
 
-            _udp.JoinMulticastGroup(address, localAddress);
+            if (_multicast)
+            {
+                _udp.JoinMulticastGroup(address, localAddress);
+            }
 
             var anyIP = new IPEndPoint(IPAddress.Any, 0);
-
 
             while (true)
             {
