@@ -85,31 +85,6 @@ namespace KLib.Network
             //StopThread();
         }
 
-        private string GetDiscoveryAddress(bool multicast,  string localAddress)
-        {
-            string discoveryAddress = "234.5.6.7";
-            if (!multicast)
-            {
-                if (localAddress.StartsWith("169.254"))
-                {
-                    discoveryAddress = "169.254.255.255";
-                }
-                else if (localAddress.StartsWith("192.168"))
-                {
-                    discoveryAddress = "192.168.1.255";
-                }
-                else if (localAddress.StartsWith("11.12"))
-                {
-                    discoveryAddress = "11.12.13.255";
-                }
-                else if (localAddress.Equals("127.0.0.1") || localAddress.Equals("localhost"))
-                {
-                    discoveryAddress = "127.0.0.1";
-                }
-            }
-            return discoveryAddress;
-        }
-
         private void ReceiveData()
         {
             Debug.Log("Discovery server listening on: " + _address);
@@ -126,7 +101,7 @@ namespace KLib.Network
 
             var ipLocal = new IPEndPoint(localAddress, 10000);
 
-            var address = IPAddress.Parse(GetDiscoveryAddress(_multicast, _address));
+            var address = IPAddress.Parse(NetworkUtils.GetDiscoveryAddress(_multicast, _address));
             var ipEndPoint = new IPEndPoint(address, 10000);
 
             _udp = new UdpClient();

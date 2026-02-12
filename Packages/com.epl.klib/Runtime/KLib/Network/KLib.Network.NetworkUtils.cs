@@ -144,5 +144,88 @@ namespace KLib.Network
 
             return address;
         }
+
+        public static string GetDiscoveryAddress(bool multicast, string localAddress)
+        {
+            string discoveryAddress = "234.5.6.7";
+            if (!multicast)
+            {
+                if (localAddress.StartsWith("169.254"))
+                {
+                    discoveryAddress = "169.254.255.255";
+                }
+                else if (localAddress.StartsWith("192.168"))
+                {
+                    discoveryAddress = "192.168.1.255";
+                }
+                else if (localAddress.StartsWith("11.12"))
+                {
+                    discoveryAddress = "11.12.13.255";
+                }
+                else if (localAddress.Equals("127.0.0.1") || localAddress.Equals("localhost"))
+                {
+                    discoveryAddress = "127.0.0.1";
+                }
+            }
+            return discoveryAddress;
+        }
+
+        public static IPEndPoint Discover(string name, int timeOut = 500, string server = "", bool multicast = true)
+        {
+            UdpClient udp = null;
+            IPEndPoint endPoint = null;
+
+            try
+            {
+                var addy = string.IsNullOrEmpty(server) ? NetworkUtils.FindServerAddress() : server;
+                //Debug.WriteLine("discovering on: " + addy);
+
+                IPAddress localAddress;
+                if (addy.Equals("localhost"))
+                {
+                    localAddress = IPAddress.Loopback;
+                }
+                else
+                {
+                    localAddress = IPAddress.Parse(addy);
+                }
+
+                var ipLocal = new IPEndPoint(localAddress, 5555 + name.Length);
+                Debug.Log($"discovering {name} on: " + ipLocal);
+
+                var address = IPAddress.Parse(GetDiscoveryAddress(multicast, addy));
+                var ipEndPoint = new IPEndPoint(address, 10000);
+
+                udp = new UdpClient(ipLocal);
+                udp.Client.ReceiveTimeout = timeOut;
+
+                if (multicast)
+                {
+                    udp.JoinMulticastGroup(address, localAddress);
+                }
+                udp.Send(System.Text.Encoding.UTF8.GetBytes(name), name.Length, ipEndPoint);
+
+                var anyIP = new IPEndPoint(IPAddress.Any, 0);
+
+                var bytes = udp.Receive(ref anyIP);
+                var response = System.Text.Encoding.Default.GetString(bytes);
+                var responseParts = response.Split(';');
+
+                var port = Int32.Parse(responseParts[0]);
+                endPoint = new IPEndPoint(anyIP.Address, port);
+            }
+            catch (Exception ex)
+            {
+                //Debug.Log($"Discover error, {name}: {ex.Message}");
+            }
+
+            if (udp != null)
+            {
+                udp.Close();
+            }
+
+            return endPoint;
+        }
+
     }
 }
