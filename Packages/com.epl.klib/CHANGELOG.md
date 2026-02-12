@@ -2,7 +2,7 @@
 
 ### v1.3 (2026-02-11)
 #### Added
-- subnet discovery server
+- subnet discovery/discovery server
 
 ---
 
