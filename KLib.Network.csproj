@@ -61,10 +61,12 @@
     <Analyzer Include="C:\Program Files\Unity\Hub\Editor\6000.0.47f1\Editor\Data\Tools\Unity.SourceGenerators\Unity.UIToolkit.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Packages\com.epl.klib\Runtime\KLib\Network\KLib.Network.KTcpClient.cs" />
-    <Compile Include="Packages\com.epl.klib\Runtime\KLib\Network\KLib.Network.NetworkDiscoveryServer.cs" />
-    <Compile Include="Packages\com.epl.klib\Runtime\KLib\Network\KLib.Network.KTcpListener.cs" />
-    <Compile Include="Packages\com.epl.klib\Runtime\KLib\Network\KLib.Network.NetworkUtils.cs" />
+    <Compile Include="Packages\com.epl.klib\Runtime\KLib\Network\ServerBeacon.cs" />
+    <Compile Include="Packages\com.epl.klib\Runtime\KLib\Network\KTcpClient.cs" />
+    <Compile Include="Packages\com.epl.klib\Runtime\KLib\Network\DiscoveryBeacon.cs" />
+    <Compile Include="Packages\com.epl.klib\Runtime\KLib\Network\Discovery.cs" />
+    <Compile Include="Packages\com.epl.klib\Runtime\KLib\Network\TcpMessage.cs" />
+    <Compile Include="Packages\com.epl.klib\Runtime\KLib\Network\KTcpListener.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Packages\com.epl.klib\Runtime\KLib\Network\KLib.Network.asmdef" />
