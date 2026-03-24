@@ -7,7 +7,7 @@ using System.Net;
 using System.Text;
 using System.Net.Sockets;
 
-namespace KLib.Net
+namespace KLibU.Net
 {
     /// <summary>
     /// Provides TCP server functionality for accepting client connections and exchanging TcpMessage objects.

@@ -11,9 +11,9 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using ProtoBuf;
 
-namespace KLib
+namespace KLibU
 { 
-    public static class FileIO
+    public static class Files
     {
         public static string TimeStamp { get { return DateTime.Now.ToString("yyyyMMdd_HHmmss"); } }
 

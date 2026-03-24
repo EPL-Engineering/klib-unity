@@ -10,7 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 
-namespace KLib.Net
+namespace KLibU.Net
 {
     /// <summary>
     /// Provides TCP client functionality for sending and receiving TcpMessage objects using a length-prefixed wire protocol.

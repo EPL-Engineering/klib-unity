@@ -1,6 +1,6 @@
 using Newtonsoft.Json;
 
-namespace KLib.Net
+namespace KLibU.Net
 {
     /// <summary>
     /// Unified message envelope used for all TCP communication.

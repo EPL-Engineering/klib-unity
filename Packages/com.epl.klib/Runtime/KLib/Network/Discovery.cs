@@ -8,7 +8,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace KLib.Net
+namespace KLibU.Net
 {
     /// <summary>
     /// Provides network discovery utilities for finding available endpoints and addresses.

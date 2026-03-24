@@ -4,7 +4,7 @@ using System.IO;
 using System.Text;
 using UnityEngine;
 
-namespace KLib
+namespace KLibU
 {
     /// <summary>
     /// Simple logging utility
@@ -142,7 +142,7 @@ namespace KLib
 
         public void FlushLog()
         {
-            FileIO.AppendTextFile(_logPath, _log.ToString());
+            Files.AppendTextFile(_logPath, _log.ToString());
             _log.Clear();
         }
 

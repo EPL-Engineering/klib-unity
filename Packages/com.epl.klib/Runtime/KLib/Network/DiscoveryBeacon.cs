@@ -6,7 +6,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 
-namespace KLib.Net
+namespace KLibU.Net
 {
     /// <summary>
     /// 
@@ -31,7 +31,7 @@ namespace KLib.Net
                 Version = 1
             };
 
-            var broadcastMessage = KLib.FileIO.JSONSerializeToString(beacon);
+            var broadcastMessage = KLibU.Files.JSONSerializeToString(beacon);
 
             var broadcastAddress = Discovery.GetDiscoveryAddress(multicast: false, IPAddress.Parse(address));
             var broadcastEndPoint = new IPEndPoint(broadcastAddress, 10001);
