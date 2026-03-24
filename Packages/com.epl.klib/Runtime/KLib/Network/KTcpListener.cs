@@ -141,5 +141,12 @@ namespace KLibU.Net
             return result;
         }
 
+        /// <summary>Reads a length-prefixed byte array without sending a per-chunk acknowledgement.</summary>
+        public byte[] ReadRawBytes()
+        {
+            int nbytes = _theReader.ReadInt32();
+            return _theReader.ReadBytes(nbytes);
+        }
+
     }
 }
