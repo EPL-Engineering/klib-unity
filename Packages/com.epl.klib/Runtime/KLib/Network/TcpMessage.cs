@@ -49,9 +49,9 @@ namespace KLibU.Net
         // -------------------------------------------------------------------------
 
         /// <summary>Creates a 200-OK response with an optional JSON payload.</summary>
-        public static TcpMessage Ok(string payload = "{}")
+        public static TcpMessage Ok()
         {
-            return new TcpMessage { Code = 200, Payload = payload };
+            return new TcpMessage { Code = 200, Payload = "{}" };
         }
 
         /// <summary>Creates a 200-OK response by serialising any object as the payload.</summary>
