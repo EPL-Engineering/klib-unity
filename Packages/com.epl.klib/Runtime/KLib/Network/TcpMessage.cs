@@ -1,4 +1,4 @@
-using Codice.Utils;
+using System;
 using Newtonsoft.Json;
 
 namespace KLibU.Net
@@ -108,7 +108,7 @@ namespace KLibU.Net
             => new TcpMessage
             {
                 Command = command,
-                Payload = KLibU.Files.XmlSerializeToString(payload),
+                Payload = XmlSerialize(payload.GetType(), payload),
                 PayloadEncoding = "xml"
             };
         // -------------------------------------------------------------------------
@@ -125,9 +125,33 @@ namespace KLibU.Net
         {
             if (PayloadEncoding == "xml")
             {
-                return KLibU.Files.XmlDeserializeFromString<T>(Payload);
+                return XmlDeserialize<T>(Payload);
             }
             return JsonConvert.DeserializeObject<T>(Payload);
+        }
+
+        public static string XmlSerialize(Type type, object obj)
+        {
+            var sb = new System.Text.StringBuilder();
+            using (var writer = new System.IO.StringWriter(sb))
+            {
+                var serializer = new System.Xml.Serialization.XmlSerializer(type);
+                serializer.Serialize(writer, obj);
+            }
+            return sb.ToString();
+        }
+
+        // Keep the generic version as a convenience wrapper
+        public static string XmlSerialize<T>(T obj)
+            => XmlSerialize(typeof(T), obj);
+
+        private static T XmlDeserialize<T>(string xml)
+        {
+            using (var reader = new System.IO.StringReader(xml))
+            {
+                var serializer = new System.Xml.Serialization.XmlSerializer(typeof(T));
+                return (T)serializer.Deserialize(reader);
+            }
         }
     }
 }
