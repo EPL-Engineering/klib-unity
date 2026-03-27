@@ -1,3 +1,4 @@
+using Codice.Utils;
 using Newtonsoft.Json;
 
 namespace KLibU.Net
@@ -23,6 +24,8 @@ namespace KLibU.Net
         /// On a response, used optionally for a human-readable status message.
         /// </summary>
         public string Command { get; set; }
+
+        public string PayloadEncoding { get; set; } = "json";  
 
         /// <summary>
         /// Always a JSON string. Use "{}" when there is no meaningful payload.
@@ -51,7 +54,7 @@ namespace KLibU.Net
         /// <summary>Creates a 200-OK response with an optional JSON payload.</summary>
         public static TcpMessage Ok()
         {
-            return new TcpMessage { Code = 200, Payload = "{}" };
+            return new TcpMessage { Code = 200, PayloadEncoding = "json", Payload = "{}" };
         }
 
         /// <summary>Creates a 200-OK response by serialising any object as the payload.</summary>
@@ -60,6 +63,7 @@ namespace KLibU.Net
             return new TcpMessage
             {
                 Code = 200,
+                PayloadEncoding = "json",
                 Payload = JsonConvert.SerializeObject(payloadObject)
             };
         }
@@ -67,7 +71,7 @@ namespace KLibU.Net
         /// <summary>Creates a 400 Bad Request response.</summary>
         public static TcpMessage BadRequest(string message = "Bad request")
         {
-            return new TcpMessage { Code = 400, Command = message, Payload = "{}" };
+            return new TcpMessage { Code = 400, Command = message, PayloadEncoding = "json", Payload = "{}" };
         }
 
         /// <summary>Creates a 404 Not Found response (unrecognised command).</summary>
@@ -100,6 +104,13 @@ namespace KLibU.Net
             return new TcpMessage { Command = command, Payload = payload };
         }
 
+        public static TcpMessage XmlRequest(string command, object payload)
+            => new TcpMessage
+            {
+                Command = command,
+                Payload = KLibU.Files.XmlSerializeToString(payload),
+                PayloadEncoding = "xml"
+            };
         // -------------------------------------------------------------------------
         // Convenience
         // -------------------------------------------------------------------------
@@ -112,6 +123,10 @@ namespace KLibU.Net
         /// </summary>
         public T GetPayload<T>()
         {
+            if (PayloadEncoding == "xml")
+            {
+                return KLibU.Files.XmlDeserializeFromString<T>(Payload);
+            }
             return JsonConvert.DeserializeObject<T>(Payload);
         }
     }
