@@ -148,5 +148,18 @@ namespace KLibU.Net
             return _theReader.ReadBytes(nbytes);
         }
 
+        public void WriteBuffer(byte[] buffer)
+        {
+            _theWriter.Write(buffer.Length);
+            _theWriter.Write(buffer);
+            _theWriter.Flush();
+        }
+
+        public TcpMessage ReadBufferedSendResponse()
+        {
+            int count = _theReader.ReadInt32();
+            byte[] bytes = _theReader.ReadBytes(count);
+            return TcpMessage.Deserialize(Encoding.UTF8.GetString(bytes));
+        }
     }
 }
