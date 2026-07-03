@@ -9,11 +9,11 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>10.0.20506</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <RootNamespace></RootNamespace>
-    <ProjectGuid>{FCA7227B-C5C8-1C10-A9A6-A244C4FDB62D}</ProjectGuid>
+    <RootNamespace>KLibU</RootNamespace>
+    <ProjectGuid>{E2C716A7-EA96-4D68-B10F-4459C296CBDD}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <AssemblyName>KLib</AssemblyName>
+    <AssemblyName>KLibU.Logging</AssemblyName>
     <TargetFrameworkVersion>v4.7.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <BaseDirectory>.</BaseDirectory>
@@ -61,11 +61,11 @@
     <Analyzer Include="C:\Program Files\Unity\Hub\Editor\6000.0.47f1\Editor\Data\Tools\Unity.SourceGenerators\Unity.UIToolkit.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Packages\com.epl.klib\Runtime\KLib\FileIO.cs" />
-    <Compile Include="Packages\com.epl.klib\Runtime\KLib\VolumeManager.cs" />
+    <Compile Include="Packages\com.epl.klib\Runtime\KLib\Logging\KLogger.cs" />
+    <Compile Include="Packages\com.epl.klib\Runtime\KLib\Logging\HighPrecisionClock.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Packages\com.epl.klib\Runtime\KLib\KLib.asmdef" />
+    <None Include="Packages\com.epl.klib\Runtime\KLib\Logging\KLib.Logging.asmdef" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="UnityEngine">
@@ -1098,6 +1098,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="KLib.csproj">
+      <Project>{FCA7227B-C5C8-1C10-A9A6-A244C4FDB62D}</Project>
+      <Name>KLib</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="GenerateTargetFrameworkMonikerAttribute" />

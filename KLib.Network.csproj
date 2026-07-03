@@ -65,8 +65,8 @@
     <Compile Include="Packages\com.epl.klib\Runtime\KLib\Network\KTcpClient.cs" />
     <Compile Include="Packages\com.epl.klib\Runtime\KLib\Network\DiscoveryBeacon.cs" />
     <Compile Include="Packages\com.epl.klib\Runtime\KLib\Network\Discovery.cs" />
-    <Compile Include="Packages\com.epl.klib\Runtime\KLib\Network\TcpMessage.cs" />
     <Compile Include="Packages\com.epl.klib\Runtime\KLib\Network\KTcpListener.cs" />
+    <Compile Include="Packages\com.epl.klib\Runtime\KLib\Network\TcpMessage.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Packages\com.epl.klib\Runtime\KLib\Network\KLib.Network.asmdef" />

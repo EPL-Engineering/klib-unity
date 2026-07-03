@@ -1,0 +1,17 @@
+{
+    "name": "KLib.Synthesizers",
+    "rootNamespace": "KLib",
+    "references": [
+        "GUID:a6aedfa6e81d88449823aa008464412d",
+        "GUID:56848f31afc61494b9fb66645a21d27b"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

@@ -1,0 +1,16 @@
+{
+    "name": "KLib.Logging",
+    "rootNamespace": "KLib",
+    "references": [
+        "GUID:a6aedfa6e81d88449823aa008464412d"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
