@@ -84,9 +84,16 @@ namespace KLibU.Audio
 
         private void Start()
         {
-            // Lands in the pre-session ring buffer and is flushed into the
-            // session file when the measurement opens it.
-            AudioAuditLog.WriteEvent(EnvironmentLine());
+            // Start() runs on the first frame — after every
+            // RuntimeInitializeOnLoadMethod, so ProcessTag is set by now.
+            // Idempotent, so a second caller is harmless.
+            AudioAuditLog.HeaderProvider = EnvironmentLine;
+            AudioAuditLog.OpenForRun(ProcessTag);
+
+            // Also to the app log, once, so the ENV is visible to someone who
+            // never opens the audit file.
+            Debug.Log(EnvironmentLine());
+
             AudioSettings.OnAudioConfigurationChanged += OnConfigChanged;
         }
 
