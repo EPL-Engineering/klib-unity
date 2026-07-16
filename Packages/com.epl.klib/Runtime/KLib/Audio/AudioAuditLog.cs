@@ -259,7 +259,7 @@ namespace KLibU.Audio
                 case LogType.Error:
                 case LogType.Exception:
                 case LogType.Assert:
-                    Debug.LogError(line);
+                    Debug.Log(line);
                     break;
                 case LogType.Warning:
                     Debug.LogWarning(line);
