@@ -20,12 +20,19 @@ namespace KLibU.Audio
     ///   AUDIT utc=…T18:23:01.1234567Z dsp=1234.5678 proc=Game chains=24 dn=47 peak=0.0000..0.9210 nan=0 exc=0 odd=0 new=0
     ///   AUDIT utc=…T18:25:14.9871234Z dsp=1367.4021 proc=Game chains=24 dn=47 peak=0.0000..0.9210 nan=0 exc=0 odd=2 new=0 | chain=Target[07].pan n=6231 dn=0 peak=0.0000 nan=- exc=- ch=8 | chain=Fiducial n=6231 dn=0 peak=0.0000 nan=- exc=- ch=8
     ///
-    ///   dn   is the MODE across chains, not any one chain's value. Healthy is
-    ///        sampleRate/dspBufferSize — 46.875 at 48kHz/1024, so it alternates
-    ///        47/46 on its own. ENV carries rate= and dspBuffer= for reference.
+    ///   dn   is the MODE across chains, not any one chain's value. '-' means no
+    ///        mode yet (every chain fresh). Healthy is sampleRate/dspBufferSize —
+    ///        46.875 at 48kHz/1024, so it alternates 47/46 on its own.
+    ///   exp  buffers/sec implied by the negotiated config. The absolute reference.
+    ///   ema  smoothed observed rate, '-' during warmup. Compared against exp,
+    ///        because the mode is vacuous when only one chain is running.
     ///   odd  chains deviating from the mode by more than DeltaTolerance, or
     ///        carrying a latched NaN/exception. Only these are enumerated.
     ///   new  chains registered since the last tick. Baselined, not evaluated.
+    ///
+    /// dn ramping over the first few ticks (0, 29, 43, 47…) is startup, not a
+    /// fault: the first interval is partial and the device is still opening.
+    /// That is what RateWarmupTicks exists to skip.
     ///
     /// Decision table:
     ///   dn -> 0 on every chain at once           graph-level (config change, DSP thread death)
@@ -56,6 +63,24 @@ namespace KLibU.Audio
         /// </summary>
         private const long DeltaTolerance = 1;
 
+        /// <summary>
+        /// Fractional deviation of the SMOOTHED graph rate from the rate implied
+        /// by sampleRate/dspBufferSize before the graph is called slow.
+        ///
+        /// The per-chain check compares each chain to the mode, which is robust
+        /// to tick jitter but vacuous when there is only one chain — a lone chain
+        /// is always its own mode, so nothing but a hard stall can ever flag. The
+        /// HTS graph is often exactly that. This is the absolute reference that
+        /// catches a single chain running at half rate, the whole graph slowing,
+        /// or a config change whose event was somehow missed.
+        /// </summary>
+        private const float RateTolerance = 0.10f;
+
+        /// <summary>Ticks of EMA warmup before the graph rate is judged. Covers device startup.</summary>
+        private const int RateWarmupTicks = 6;
+
+        private const float RateEmaAlpha = 0.15f;
+
         private static AudioWatchdog _instance;
         private static readonly object _lock = new object();
         private static readonly List<AudioChainMonitor> _monitors = new List<AudioChainMonitor>();
@@ -80,6 +105,13 @@ namespace KLibU.Audio
         private readonly StringBuilder _odd = new StringBuilder(512);
 
         private float _nextTick;
+
+        // ---- absolute graph rate reference -------------------------------
+        /// <summary>Buffers per second implied by the negotiated config. 46.875 at 48k/1024.</summary>
+        private float _expectedDelta;
+        private float _rateEma;
+        private int _rateTicks;
+        private bool _rateFlagged;
 
         // ------------------------------------------------------------------
         // Registration
@@ -124,6 +156,24 @@ namespace KLibU.Audio
             Debug.Log(EnvironmentLine());
 
             AudioSettings.OnAudioConfigurationChanged += OnConfigChanged;
+
+            RecomputeExpectedRate();
+        }
+
+        /// <summary>
+        /// The rate Unity's graph should call every filter at, from the config it
+        /// actually negotiated. Non-integral in general: 48000/1024 = 46.875.
+        /// </summary>
+        private void RecomputeExpectedRate()
+        {
+            var c = AudioSettings.GetConfiguration();
+            _expectedDelta = (c.dspBufferSize > 0)
+                ? (float)c.sampleRate / c.dspBufferSize
+                : 0f;
+
+            _rateEma = 0f;
+            _rateTicks = 0;
+            _rateFlagged = false;
         }
 
         private void OnDestroy()
@@ -154,6 +204,10 @@ namespace KLibU.Audio
                 LogType.Warning);
 
             Alarm?.Invoke("Audio configuration changed — AudioSources do not auto-resume");
+
+            // dspBufferSize and sampleRate may both have moved. The old expected
+            // rate and the EMA built against it are meaningless now.
+            RecomputeExpectedRate();
         }
 
         // ------------------------------------------------------------------
@@ -268,6 +322,10 @@ namespace KLibU.Audio
             // run, which for a take-home unit is a long time.
             PruneBookkeeping();
 
+            // Absolute reference. The per-chain mode comparison cannot see a lone
+            // chain running slow, or the whole graph slowing together.
+            CheckGraphRate(modeDelta, haveMode);
+
             if (peakMin > peakMax) { peakMin = 0f; peakMax = 0f; }
 
             _sb.Length = 0;
@@ -275,7 +333,12 @@ namespace KLibU.Audio
                .Append(" dsp=").Append(AudioSettings.dspTime.ToString("F4"))
                .Append(" proc=").Append(ProcessTag)
                .Append(" chains=").Append(list.Length)
-               .Append(" dn=").Append(modeDelta)
+               // '-' rather than 0 when there is no mode: every chain is fresh, so
+               // nothing has been measured. Printing 0 here is the stall signature,
+               // which is the last thing that should ever appear falsely.
+               .Append(" dn=").Append(haveMode ? modeDelta.ToString() : "-")
+               .Append(" exp=").Append(_expectedDelta.ToString("F2"))
+               .Append(" ema=").Append(_rateTicks >= RateWarmupTicks ? _rateEma.ToString("F2") : "-")
                .Append(" peak=").Append(peakMin.ToString("F4")).Append("..").Append(peakMax.ToString("F4"))
                .Append(" nan=").Append(nanChains)
                .Append(" exc=").Append(excChains)
@@ -286,6 +349,54 @@ namespace KLibU.Audio
 
             AudioAuditLog.Write(_sb.ToString());
             AudioAuditLog.Tick();
+        }
+
+        /// <summary>
+        /// Compares the graph's observed buffer rate against the rate the
+        /// negotiated config implies.
+        ///
+        /// Smoothed, because tick jitter legitimately moves a single tick's dn by
+        /// a buffer either way (46/47/48 around an expected 46.875) and an
+        /// instantaneous comparison against an absolute reference would flag
+        /// constantly. The EMA averages that out; a real rate change survives it.
+        ///
+        /// Warmed up, because the first few seconds are device open and buffer
+        /// fill, not steady state — that is the dn ramp you see at startup.
+        ///
+        /// Latched, so a persistent condition reports once, with a matching
+        /// recovery line when it clears.
+        /// </summary>
+        private void CheckGraphRate(long modeDelta, bool haveMode)
+        {
+            if (!haveMode || _expectedDelta <= 0f) return;
+
+            _rateEma = (_rateTicks == 0)
+                ? modeDelta
+                : _rateEma + RateEmaAlpha * (modeDelta - _rateEma);
+
+            _rateTicks++;
+            if (_rateTicks < RateWarmupTicks) return;
+
+            float deviation = Mathf.Abs(_rateEma - _expectedDelta) / _expectedDelta;
+
+            if (deviation > RateTolerance && !_rateFlagged)
+            {
+                _rateFlagged = true;
+                AudioAuditLog.WriteEvent(
+                    $"AUDIT GRAPHRATE utc={Utc()} proc={ProcessTag} " +
+                    $"expected={_expectedDelta:F2} observed={_rateEma:F2} " +
+                    $"deviation={deviation:P1}",
+                    LogType.Error);
+                Alarm?.Invoke($"Audio graph running at {_rateEma:F1} buffers/s, expected {_expectedDelta:F1}");
+            }
+            else if (deviation <= RateTolerance && _rateFlagged)
+            {
+                _rateFlagged = false;
+                AudioAuditLog.WriteEvent(
+                    $"AUDIT GRAPHRATE.recovered utc={Utc()} proc={ProcessTag} " +
+                    $"expected={_expectedDelta:F2} observed={_rateEma:F2}",
+                    LogType.Warning);
+            }
         }
 
         private void AppendChain(AudioChainMonitor.Snapshot s, long delta, string note)
