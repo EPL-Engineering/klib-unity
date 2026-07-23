@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KLib", "KLib.csproj", "{FCA
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KLib.Logging", "KLib.Logging.csproj", "{F42319F2-2BBD-2D38-E6F9-8C41A97B24A4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Assembly-CSharp", "Assembly-CSharp.csproj", "{6E4B4C01-702C-A5C3-9E81-E0881327A93D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -37,6 +39,10 @@ Global
 		{F42319F2-2BBD-2D38-E6F9-8C41A97B24A4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F42319F2-2BBD-2D38-E6F9-8C41A97B24A4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F42319F2-2BBD-2D38-E6F9-8C41A97B24A4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6E4B4C01-702C-A5C3-9E81-E0881327A93D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6E4B4C01-702C-A5C3-9E81-E0881327A93D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6E4B4C01-702C-A5C3-9E81-E0881327A93D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6E4B4C01-702C-A5C3-9E81-E0881327A93D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
