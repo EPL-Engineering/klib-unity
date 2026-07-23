@@ -32,6 +32,12 @@ namespace KLib
         public static extern int SetVolumeDB(float volume);
 
         [DllImport("SystemVolumePlugin")]
+        public static extern int GetMute();
+
+        [DllImport("SystemVolumePlugin")]
+        public static extern int SetMute(int mute);
+
+        [DllImport("SystemVolumePlugin")]
         public static extern int InitializeVolume();
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]

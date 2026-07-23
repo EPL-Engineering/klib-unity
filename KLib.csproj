@@ -61,11 +61,7 @@
     <Analyzer Include="C:\Program Files\Unity\Hub\Editor\6000.0.47f1\Editor\Data\Tools\Unity.SourceGenerators\Unity.UIToolkit.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Packages\com.epl.klib\Runtime\KLib\Audio\AudioChainMonitor.cs" />
-    <Compile Include="Packages\com.epl.klib\Runtime\KLib\Audio\AudioWatchdog.cs" />
     <Compile Include="Packages\com.epl.klib\Runtime\KLib\FileIO.cs" />
-    <Compile Include="Packages\com.epl.klib\Runtime\KLib\Audio\AudioAuditLog.cs" />
-    <Compile Include="Packages\com.epl.klib\Runtime\KLib\Audio\SpeakerModeExtensions.cs" />
     <Compile Include="Packages\com.epl.klib\Runtime\KLib\VolumeManager.cs" />
   </ItemGroup>
   <ItemGroup>
