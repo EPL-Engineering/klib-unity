@@ -74,6 +74,17 @@ namespace KLib
 
             //        SetSystemVolume(volume, vUnit);
         }
+
+        public bool IsMuted()
+        {
+            return GetMute() == 1;
+        }
+
+        public void Mute(bool mute)
+        {
+            SetMute(mute ? 1 : 0);
+        }
+
         public string FriendlyName { get { return GetFriendlyName(); } }
 
         public void PrintLogString(string str)
